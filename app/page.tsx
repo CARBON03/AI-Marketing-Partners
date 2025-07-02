@@ -276,6 +276,7 @@ export default function HomePage() {
               </p>
 
               <div className="flex justify-center mb-12">
+                <Link href="/contact" className="flex items-center">
                 <Button
                   size="lg"
                   className="bg-black text-white hover:bg-gray-800 px-8 py-4 text-lg font-medium rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 group"
@@ -283,6 +284,7 @@ export default function HomePage() {
                   Start Your AI Journey
                   <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
                 </Button>
+                </Link>
               </div>
 
               {/* Trust Indicators */}
