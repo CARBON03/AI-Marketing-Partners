@@ -7,8 +7,17 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { motion } from "framer-motion"
-import { Suspense } from "react"
-import { Mail, Phone, MapPin, Clock, MessageSquare, Users } from "lucide-react"
+import { Suspense, useState } from "react"
+import { Mail, Phone, MapPin, Clock, MessageSquare, Users, CheckCircle, AlertCircle, Loader2 } from "lucide-react"
+
+interface FormData {
+  firstName: string;
+  lastName: string;
+  email: string;
+  company: string;
+  phone: string;
+  message: string;
+}
 
 function FloatingContactElements() {
   return (
@@ -26,30 +35,106 @@ function FloatingContactElements() {
 }
 
 export default function ContactPage() {
+  const [formData, setFormData] = useState<FormData>({
+    firstName: '',
+    lastName: '',
+    email: '',
+    company: '',
+    phone: '',
+    message: ''
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState<'success' | 'error' | null>(null);
+  const [submitMessage, setSubmitMessage] = useState('');
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleSubmit = async () => {
+    // Basic validation
+    if (!formData.firstName || !formData.lastName || !formData.email || !formData.message) {
+      setSubmitStatus('error');
+      setSubmitMessage('Please fill in all required fields.');
+      return;
+    }
+
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      setSubmitStatus('error');
+      setSubmitMessage('Please enter a valid email address.');
+      return;
+    }
+
+    setIsSubmitting(true);
+    setSubmitStatus(null);
+
+    try {
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (response.ok) {
+        setSubmitStatus('success');
+        setSubmitMessage('Thank you! Your message has been sent successfully. We\'ll get back to you within 24 hours.');
+        setFormData({
+          firstName: '',
+          lastName: '',
+          email: '',
+          company: '',
+          phone: '',
+          message: ''
+        });
+      } else {
+        const errorData = await response.json();
+        setSubmitStatus('error');
+        setSubmitMessage(errorData.error || 'Something went wrong. Please try again.');
+      }
+    } catch (error) {
+      setSubmitStatus('error');
+      setSubmitMessage('Network error. Please check your connection and try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   const contactInfo = [
     {
       icon: Mail,
       title: "Email Us",
       description: "Send us an email and we'll respond within 24 hours",
       contact: "support@aimarketingpartners.ai",
+      href: "mailto:support@aimarketingpartners.ai"
     },
     {
       icon: Phone,
       title: "Call Us",
       description: "Speak directly with our AI marketing experts",
       contact: "+1 (416) 230-7592",
+      href: "tel:+14162307592"
     },
     {
       icon: MapPin,
       title: "Visit Us",
       description: "Come visit our headquarters",
       contact: "Level 1, 11-15 Buckhurst St, South Melbourne VIC 3205, Australia",
+      href: "https://maps.google.com/?q=Level+1,+11-15+Buckhurst+St,+South+Melbourne+VIC+3205,+Australia"
     },
     {
       icon: Clock,
       title: "Business Hours",
       description: "We're available during these hours",
-      contact: "Mon-Fri: 9AM-6PM ACT",
+      contact: "Mon-Fri: 9AM-6PM AEST",
+      href: null
     },
   ]
 
@@ -111,38 +196,123 @@ export default function ContactPage() {
                     <p className="text-gray-600">Fill out the form below and we'll get back to you within 24 hours.</p>
                   </CardHeader>
                   <CardContent className="space-y-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">First Name</label>
-                        <Input placeholder="John" className="rounded-xl" />
+                    {/* Success/Error Messages */}
+                    {submitStatus && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className={`p-4 rounded-xl flex items-start space-x-3 ${
+                          submitStatus === 'success' 
+                            ? 'bg-green-50 border border-green-200' 
+                            : 'bg-red-50 border border-red-200'
+                        }`}
+                      >
+                        {submitStatus === 'success' ? (
+                          <CheckCircle className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
+                        ) : (
+                          <AlertCircle className="h-5 w-5 text-red-600 mt-0.5 flex-shrink-0" />
+                        )}
+                        <p className={`text-sm leading-relaxed ${
+                          submitStatus === 'success' ? 'text-green-700' : 'text-red-700'
+                        }`}>
+                          {submitMessage}
+                        </p>
+                      </motion.div>
+                    )}
+
+                    <div className="space-y-6">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            First Name <span className="text-red-500">*</span>
+                          </label>
+                          <Input 
+                            name="firstName"
+                            value={formData.firstName}
+                            onChange={handleInputChange}
+                            placeholder="John" 
+                            className="rounded-xl" 
+                            disabled={isSubmitting}
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Last Name <span className="text-red-500">*</span>
+                          </label>
+                          <Input 
+                            name="lastName"
+                            value={formData.lastName}
+                            onChange={handleInputChange}
+                            placeholder="Doe" 
+                            className="rounded-xl"
+                            disabled={isSubmitting}
+                          />
+                        </div>
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Last Name</label>
-                        <Input placeholder="Doe" className="rounded-xl" />
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Email <span className="text-red-500">*</span>
+                        </label>
+                        <Input 
+                          type="email" 
+                          name="email"
+                          value={formData.email}
+                          onChange={handleInputChange}
+                          placeholder="john@company.com" 
+                          className="rounded-xl"
+                          disabled={isSubmitting}
+                        />
                       </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Company</label>
+                        <Input 
+                          name="company"
+                          value={formData.company}
+                          onChange={handleInputChange}
+                          placeholder="Your Company" 
+                          className="rounded-xl"
+                          disabled={isSubmitting}
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Phone</label>
+                        <Input 
+                          name="phone"
+                          value={formData.phone}
+                          onChange={handleInputChange}
+                          placeholder="+1 (555) 123-4567" 
+                          className="rounded-xl"
+                          disabled={isSubmitting}
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Message <span className="text-red-500">*</span>
+                        </label>
+                        <Textarea
+                          name="message"
+                          value={formData.message}
+                          onChange={handleInputChange}
+                          placeholder="Tell us about your project and how we can help..."
+                          className="rounded-xl min-h-[120px]"
+                          disabled={isSubmitting}
+                        />
+                      </div>
+                      <Button 
+                        onClick={handleSubmit}
+                        disabled={isSubmitting}
+                        className="w-full bg-black text-white hover:bg-gray-800 rounded-xl py-3 text-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {isSubmitting ? (
+                          <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            Sending...
+                          </>
+                        ) : (
+                          'Send Message'
+                        )}
+                      </Button>
                     </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
-                      <Input type="email" placeholder="john@company.com" className="rounded-xl" />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Company</label>
-                      <Input placeholder="Your Company" className="rounded-xl" />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Phone</label>
-                      <Input placeholder="+1 (555) 123-4567" className="rounded-xl" />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Message</label>
-                      <Textarea
-                        placeholder="Tell us about your project and how we can help..."
-                        className="rounded-xl min-h-[120px]"
-                      />
-                    </div>
-                    <Button className="w-full bg-black text-white hover:bg-gray-800 rounded-xl py-3 text-lg font-medium">
-                      Send Message
-                    </Button>
                   </CardContent>
                 </Card>
               </motion.div>
@@ -177,7 +347,18 @@ export default function ContactPage() {
                       <div>
                         <h3 className="font-semibold text-black">{info.title}</h3>
                         <p className="text-gray-600 text-sm mb-1">{info.description}</p>
-                        <p className="text-black font-medium">{info.contact}</p>
+                        {info.href ? (
+                          <a 
+                            href={info.href}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-black font-medium hover:underline"
+                          >
+                            {info.contact}
+                          </a>
+                        ) : (
+                          <p className="text-black font-medium">{info.contact}</p>
+                        )}
                       </div>
                     </motion.div>
                   ))}

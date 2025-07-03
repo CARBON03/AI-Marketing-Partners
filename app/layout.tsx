@@ -11,7 +11,12 @@ export const metadata: Metadata = {
   title: "AI Marketing Partners - AI-Powered Marketing Solutions",
   description:
     "Empowering businesses with AI-driven marketing strategies that enhance brand engagement, increase conversions, and drive measurable growth.",
-    generator: 'v0.dev'
+    generator: 'v0.dev',
+    icons: {
+    icon: "/favicon.ico", 
+    shortcut: "/favicon-16x16.png", 
+    apple: "/apple-touch-icon.png", 
+  },
 }
 
 export default function RootLayout({

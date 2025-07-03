@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { Mail, Phone, MapPin } from "lucide-react"
+import { Mail, Phone, MapPin, Instagram } from "lucide-react"
 import { motion } from "framer-motion"
 
 export default function Footer() {
@@ -18,8 +18,8 @@ export default function Footer() {
             className="space-y-6"
           >
             <Link href="/" className="inline-flex items-center space-x-3 group">
-              <div className="w-12 h-12 rounded-xl overflow-hidden bg-white flex items-center justify-center shadow-sm">
-                <img src="/logo.png" alt="AI Marketing Partners Logo" className="w-10 h-10 object-contain" />
+              <div className="w-100 h-100 rounded-xl overflow-hidden  flex items-center justify-center group-hover:scale-105 transition-transform duration-200">
+                <img src="/logo trans.PNG" alt="AI Marketing Partners Logo" className="w-20 h-20 object-contain" />
               </div>
               <div>
                 <span className="text-2xl font-bold text-black">AI Marketing Partners</span>
@@ -44,15 +44,21 @@ export default function Footer() {
             <div className="space-y-4">
               <div className="flex items-center text-gray-600 group">
                 <div className="p-2 bg-gray-100 rounded-lg mr-4 group-hover:bg-black group-hover:text-white transition-all duration-200">
+                  <Instagram className="h-5 w-5" />
+                </div>
+                <span><a href="https://www.instagram.com/aimarketingpartners?igsh=MWl5cmY4Yjg3YXZh" target="_blank">@aimarketingpartners</a></span>
+              </div>
+              <div className="flex items-center text-gray-600 group">
+                <div className="p-2 bg-gray-100 rounded-lg mr-4 group-hover:bg-black group-hover:text-white transition-all duration-200">
                   <Mail className="h-5 w-5" />
                 </div>
-                <span>support@aimarketingpartners.ai</span>
+                <span><a href="mailto:support@aimarketingpartners.ai">support@aimarketingpartners.ai</a></span>
               </div>
               <div className="flex items-center text-gray-600 group">
                 <div className="p-2 bg-gray-100 rounded-lg mr-4 group-hover:bg-black group-hover:text-white transition-all duration-200">
                   <Phone className="h-5 w-5" />
                 </div>
-                <span>+1 (416) 230-7592</span>
+                <span><a href="">+1 (416) 230-7592</a></span>
               </div>
               <div className="flex items-center text-gray-600 group">
                 <div className="p-2 bg-gray-100 rounded-lg mr-4 group-hover:bg-black group-hover:text-white transition-all duration-200">
